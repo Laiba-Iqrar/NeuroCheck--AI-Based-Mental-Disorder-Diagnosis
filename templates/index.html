@@ -1,0 +1,52 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Disorder Diagnosis Predictor</title>
+</head>
+<body>
+    <h2>Mental Disorder Diagnosis Predictor</h2>
+    <form id="diagnosisForm">
+        {% for symptom, options in symptoms.items() %}
+            <div>
+                <label for="{{ symptom }}">{{ symptom }}:</label>
+
+                {% if options['type'] == 'ordinal' %}
+                    <select name="{{ symptom }}" id="{{ symptom }}">
+                        <option value="Seldom">Seldom</option>
+                        <option value="Sometimes">Sometimes</option>
+                        <option value="Usually">Usually</option>
+                        <option value="Most-Often">Most-Often</option>
+                    </select>
+
+                {% elif options['type'] == 'binary' %}
+                    <input type="radio" name="{{ symptom }}" value="YES"> Yes
+                    <input type="radio" name="{{ symptom }}" value="NO"> No
+
+                {% elif options['type'] == 'numerical' %}
+                    <input type="range" name="{{ symptom }}" min="1" max="10" step="1">
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit">Get Diagnosis</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById("diagnosisForm").onsubmit = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById("result").innerText = `Predicted Diagnosis: ${result.diagnosis}`;
+        };
+    </script>
+</body>
+</html>
