@@ -3,7 +3,7 @@
 import joblib
 from sklearn.neural_network import MLPClassifier
 
-def build_model(hidden_layer_sizes=(64, 32), max_iter=500):
+def build_model(hidden_layer_sizes=(64, 32), max_iter=1000):
     model = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, activation='relu', solver='adam', max_iter=max_iter, random_state=42)
     return model
 

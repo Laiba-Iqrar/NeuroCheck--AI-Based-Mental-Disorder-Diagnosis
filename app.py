@@ -44,18 +44,19 @@ def predict():
     input_df = pd.DataFrame([user_input])
 
     # Preprocess input_df to match model's expected format
-    processed_input = preprocess_data(input_df, is_user_data=True)
+    # processed_input = preprocess_data(input_df, is_user_data=True)
     
     # Ensure only numerical data is passed to the model for prediction
-    prediction = model.predict(processed_input)
-    diagnosis = label_encoder.inverse_transform(prediction)[0]
+    prediction = model.predict(input_df)
+    # diagnosis = label_encoder.inverse_transform(prediction)[0]
     
+    prediction_list = prediction.tolist()
     # Add the diagnosis to input data
-    input_df['Diagnosis'] = diagnosis
+    input_df['Diagnosis'] = prediction
     
     # Save user response without further processing
     save_user_response(input_df)
-    return jsonify({"diagnosis": diagnosis})
+    return jsonify({"diagnosis": prediction_list})
 
 def save_user_response(data):
     if os.path.exists(USER_DATA_FILE):

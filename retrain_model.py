@@ -21,15 +21,16 @@ def retrain_with_new_data(new_data_path="data/user_responses.csv"):
     y_original_encoded, label_encoder = encode_labels(y_original)
     
     # Combine processed features with the encoded target column
+    
     original_data_processed = pd.concat([X_original_processed, pd.Series(y_original_encoded, name="Expert Diagnose")], axis=1)
     
     # Load new responses (already preprocessed)
     new_data = pd.read_csv(new_data_path)
-    X_new_data_processed = new_data.drop(columns=['Diagnosis'], errors='ignore')
+    # X_new_data_processed = new_data.drop(columns=['Diagnosis'], errors='ignore')
    
-    y_new_data_processed = new_data['Diagnosis']
-    y_new_encoded, label_encoder = encode_labels(y_new_data_processed)
-    new_data = pd.concat([X_new_data_processed, pd.Series(y_new_encoded, name="Diagnosis")], axis=1)
+    # y_new_data_processed = new_data['Diagnosis']
+    # y_new_encoded, label_encoder = encode_labels(y_new_data_processed)
+    # new_data = pd.concat([X_new_data_processed, pd.Series(y_new_encoded, name="Diagnosis")], axis=1)
                                                    
     # Rename 'Diagnosis' to 'Expert Diagnose' in new data to match the original dataset's target column
     new_data = new_data.rename(columns={"Diagnosis": "Expert Diagnose"})
