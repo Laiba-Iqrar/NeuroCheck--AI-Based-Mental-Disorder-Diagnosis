@@ -13,7 +13,7 @@
         {% for symptom, options in symptoms.items() %}
             <div>
                 <label for="{{ symptom }}">{{ symptom }}:</label>
-
+                
                 {% if options['type'] == 'ordinal' %}
                     <select name="{{ symptom }}" id="{{ symptom }}">
                         <option value="Seldom">Seldom</option>
@@ -23,8 +23,13 @@
                     </select>
 
                 {% elif options['type'] == 'binary' %}
-                    <input type="radio" name="{{ symptom }}" value="YES"> Yes
-                    <input type="radio" name="{{ symptom }}" value="NO"> No
+                    <select name="{{ symptom }}" id="{{ symptom }}">
+                        <option value="1.0">Definitely Yes</option>
+                        <option value="0.75">Probably Yes</option>
+                        <option value="0.5">Uncertain</option>
+                        <option value="0.25">Probably No</option>
+                        <option value="0.0">Definitely No</option>
+                    </select>
 
                 {% elif options['type'] == 'numerical' %}
                     <input type="range" name="{{ symptom }}" min="1" max="10" step="1">

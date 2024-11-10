@@ -5,6 +5,7 @@ import pandas as pd
 import joblib
 from src.preprocess import preprocess_data
 from src.utils import get_binary_encoding_columns, get_ordinal_encoding_columns
+from retrain_model import retrain_with_new_data
 import os
 
 app = Flask(__name__)
@@ -40,21 +41,20 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     user_input = request.form.to_dict()
-
-    # Convert input to DataFrame
     input_df = pd.DataFrame([user_input])
 
-    # Process user input to match model format
-    processed_input = preprocess_data(input_df)
-
-    # Make prediction
+    # Preprocess input_df to match model's expected format
+    processed_input = preprocess_data(input_df, is_user_data=True)
+    
+    # Ensure only numerical data is passed to the model for prediction
     prediction = model.predict(processed_input)
     diagnosis = label_encoder.inverse_transform(prediction)[0]
-
-    # Store user input and prediction
+    
+    # Add the diagnosis to input data
     input_df['Diagnosis'] = diagnosis
+    
+    # Save user response without further processing
     save_user_response(input_df)
-
     return jsonify({"diagnosis": diagnosis})
 
 def save_user_response(data):
@@ -62,6 +62,16 @@ def save_user_response(data):
         data.to_csv(USER_DATA_FILE, mode='a', header=False, index=False)
     else:
         data.to_csv(USER_DATA_FILE, index=False)
+
+@app.route('/retrain', methods=['POST'])
+def retrain():
+    retrain_with_new_data()  # Call retraining function
+
+    # Reload the updated model and label encoder after retraining
+    global model, label_encoder
+    model = joblib.load("model/trained_model.pkl")
+    label_encoder = joblib.load("model/label_encoder.pkl")
+    return jsonify({"status": "Model retrained and updated in memory successfully"})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -12,3 +12,12 @@ def get_binary_encoding_columns():
 
 def extract_numerical_part(column):
     return column.str.extract('(\d+)').astype(float)
+
+def get_fuzzy_logic_mapping():
+    return {
+        "Definitely Yes": 1.0,
+        "Probably Yes": 0.75,
+        "Uncertain": 0.5,
+        "Probably No": 0.25,
+        "Definitely No": 0.0
+    }
