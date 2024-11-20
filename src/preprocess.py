@@ -47,4 +47,4 @@ def encode_labels(labels):
     label_encoder = LabelEncoder()
     encoded_labels = label_encoder.fit_transform(labels)
     return encoded_labels, label_encoder
-#3-> Normal 2->Depression 1->BPD2 0->BPD1
+#3-> Normal 2->Depression 1->BP2 0->BP1
