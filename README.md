@@ -4,18 +4,10 @@
 
 The **Mental Disorder Diagnosis Predictor** is a machine learning application that provides diagnostic predictions for mental health disorders based on user-inputted symptoms. It utilizes a trained neural network model to classify mental health disorders, with diagnoses such as Bipolar Type I, Bipolar Type II, Depression, and Normal. The application includes an option for users to submit symptom data via a web form, and it provides predictions in real-time.
 
-This README file will guide you through the setup, structure, and functionality of the project.
+![Screenshot 2024-11-20 144402](https://github.com/user-attachments/assets/68ad4855-d15b-4f80-8fb6-e9f783825872)
+![Screenshot 2024-11-20 144338](https://github.com/user-attachments/assets/0ca3ff59-50cd-444e-88c5-50ccc807c5fa)
 
-## Table of Contents
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Usage](#usage)
-- [Available Endpoints](#available-endpoints)
-- [Retraining the Model](#retraining-the-model)
-- [Contributing](#contributing)
-- [License](#license)
 
-## Project Structure
 
 The project consists of several main components:
 ```
@@ -46,12 +38,7 @@ mental_disorder_diagnosis/
 - **Python 3.7+**
 - **pip** (Python package installer)
 
-### Installation
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/mental_disorder_diagnosis.git
-   cd mental_disorder_diagnosis
-   ```
+
 
 2. Install required Python packages by running the installation script:
    ```bash
