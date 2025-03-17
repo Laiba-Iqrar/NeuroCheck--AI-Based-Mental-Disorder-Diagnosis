@@ -67,14 +67,16 @@
     const MAX_RETRIES = 2;
     let retryCount = 0;
 
-    // Unified message handling function
+
+    
+
     async function sendMessage(message) {
         if (!message.trim() || isProcessing) return;
-
+    
         isProcessing = true;
         addMessage(message, true);
         const typingIndicator = showTypingIndicator();
-
+    
         try {
             const response = await fetch('/chat', {
                 method: 'POST',
@@ -84,27 +86,48 @@
                 },
                 body: JSON.stringify({ message: message })
             });
-
+    
             const data = await response.json();
-            
-            if (!response.ok) {
-                handleApiError(response, data, message);
-                return;
-            }
-
             hideTypingIndicator(typingIndicator);
-            addMessage(data.response);
-            retryCount = 0;
-
+    
+            // Handle assessment flow
+            if (data.status && data.status.startsWith('assessment')) {
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-message bot-message';
+                bubble.innerHTML = `
+                    <div class="message-bubble">
+                        <p>${data.response}</p>
+                        ${data.options ? `
+                        <div class="options-container mt-2">
+                            ${data.options.map((option, index) => `
+                                <button class="btn btn-sm btn-outline-primary me-2 mb-2 option-btn" 
+                                        data-score="${index}">
+                                    ${option}
+                                </button>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                chatContainer.appendChild(bubble);
+            } 
+            else if (data.status === 'error') {
+                addMessage(data.response);
+            }
+            else {
+                addMessage(data.response);
+            }
+    
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+    
         } catch (error) {
-            console.error('Error:', error);
             hideTypingIndicator(typingIndicator);
             addMessage("⚠️ Connection issue. Please check your internet.");
+            console.error('Error:', error);
         } finally {
             isProcessing = false;
         }
-    }
-
+    }  
     // Helper functions
     function handleApiError(response, data, originalMessage) {
         const errorMessage = data.error || 'Unknown server error';
@@ -114,7 +137,7 @@
             setTimeout(() => sendMessage(originalMessage), 3000);
             addMessage(`⌛ Server busy, retrying (${retryCount}/${MAX_RETRIES})...`);
         } else {
-            addMessage(`❌ Error: ${errorMessage}`);
+            addMessage(` Error: ${errorMessage}`);
             retryCount = 0;
         }
     }
@@ -172,13 +195,21 @@
             }
         }
     });
-
-    // Updated quick reply handler
     document.querySelectorAll('.quick-reply').forEach(button => {
         button.addEventListener('click', (e) => {
             const message = e.target.dataset.msg;
             sendMessage(message);
         });
+    // Updated quick reply handler
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('option-btn')) {
+            const score = e.target.dataset.score;
+            sendMessage(score);
+        }
+    });
+
+
+    
     });
 </script>
 {% endblock %}

@@ -175,3 +175,30 @@ body {
     background: #f8d7da;
     border: 1px solid #f5c6cb;
 }
+
+/* Add to static/css/main.css */
+.options-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.option-btn {
+    transition: all 0.2s;
+}
+
+.option-btn:hover {
+    transform: translateY(-2px);
+}
+
+.recommendations {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.recommendations ul {
+    margin-bottom: 0;
+    padding-left: 20px;
+}
