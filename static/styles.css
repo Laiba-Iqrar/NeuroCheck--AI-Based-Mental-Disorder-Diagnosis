@@ -93,3 +93,85 @@ body {
 .slider-container {
     margin: 1rem 0;
 }
+
+/* Chat Container */
+.chat-container {
+    height: 500px;
+    overflow-y: auto;
+}
+
+/* Chat Messages */
+.chat-message {
+    margin: 10px 0;
+}
+
+.message-bubble {
+    max-width: 80%;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+.user-message .message-bubble {
+    background: #e3f2fd;
+    margin-left: auto;
+}
+
+.bot-message .message-bubble {
+    background: #f8f9fa;
+    margin-right: auto;
+}
+
+.quick-replies {
+    margin-top: 10px;
+}
+
+.quick-replies .btn {
+    margin: 2px;
+}
+
+/* Chat Input */
+#messageInput:focus {
+    box-shadow: none;
+    border-color: #6a1b9a;
+}
+
+#sendButton {
+    transition: all 0.3s ease;
+}
+
+#sendButton:hover {
+    transform: scale(1.05);
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 15px;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    margin: 0 2px;
+    background: #666;
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+@keyframes typing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* Error Messages */
+.error-message {
+    color: #dc3545;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
