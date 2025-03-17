@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Mental Health Assistant</h4>
+                </div>
+                
+                <div class="card-body chat-container">
+                    <div class="chat-message bot-message">
+                        <div class="message-bubble">
+                            <p>Hello! I'm here to help. How can I assist you today?</p>
+                            <div class="quick-replies">
+                                <!-- Added data-msg attribute for quick replies -->
+                                <button class="btn btn-sm btn-outline-primary quick-reply" 
+                                        data-msg="I'm feeling anxious">
+                                    😟 Anxiety Help
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary quick-reply" 
+                                        data-msg="I need coping strategies">
+                                    🧘 Coping Tips
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary quick-reply" 
+                                        data-msg="Find professional resources">
+                                    🏥 Professional Help
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="input-group">
+                        <!-- Added autocomplete attribute -->
+                        <input type="text" class="form-control" id="messageInput" 
+                               placeholder="Type your message..." autocomplete="off">
+                        <button class="btn btn-primary" id="sendButton">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Added emergency resources section -->
+            <div class="alert alert-warning mt-3" id="emergency">
+                <h5>Emergency Resources</h5>
+                <ul class="mb-0">
+                    <li>National Suicide Prevention Lifeline: 1-800-273-TALK (8255)</li>
+                    <li>Crisis Text Line: Text HOME to 741741</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize variables
+    const chatContainer = document.querySelector('.chat-container');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    let isProcessing = false;
+    const MAX_RETRIES = 2;
+    let retryCount = 0;
+
+    // Unified message handling function
+    async function sendMessage(message) {
+        if (!message.trim() || isProcessing) return;
+
+        isProcessing = true;
+        addMessage(message, true);
+        const typingIndicator = showTypingIndicator();
+
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                handleApiError(response, data, message);
+                return;
+            }
+
+            hideTypingIndicator(typingIndicator);
+            addMessage(data.response);
+            retryCount = 0;
+
+        } catch (error) {
+            console.error('Error:', error);
+            hideTypingIndicator(typingIndicator);
+            addMessage("⚠️ Connection issue. Please check your internet.");
+        } finally {
+            isProcessing = false;
+        }
+    }
+
+    // Helper functions
+    function handleApiError(response, data, originalMessage) {
+        const errorMessage = data.error || 'Unknown server error';
+        
+        if (response.status === 503 && retryCount < MAX_RETRIES) {
+            retryCount++;
+            setTimeout(() => sendMessage(originalMessage), 3000);
+            addMessage(`⌛ Server busy, retrying (${retryCount}/${MAX_RETRIES})...`);
+        } else {
+            addMessage(`❌ Error: ${errorMessage}`);
+            retryCount = 0;
+        }
+    }
+
+    function showTypingIndicator() {
+        const typing = document.createElement('div');
+        typing.className = 'chat-message bot-message';
+        typing.innerHTML = `
+            <div class="message-bubble typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        `;
+        chatContainer.appendChild(typing);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        return typing;
+    }
+
+    function hideTypingIndicator(indicator) {
+        if (indicator?.parentNode) {
+            indicator.parentNode.removeChild(indicator);
+        }
+    }
+
+    function addMessage(message, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${isUser ? 'user-message' : 'bot-message'}`;
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.innerHTML = `<p>${message}</p>`;
+        
+        messageDiv.appendChild(bubble);
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Event listeners
+    sendButton.addEventListener('click', () => {
+        const message = messageInput.value.trim();
+        if (message) {
+            messageInput.value = '';
+            sendMessage(message);
+        }
+    });
+
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                messageInput.value = '';
+                sendMessage(message);
+            }
+        }
+    });
+
+    // Updated quick reply handler
+    document.querySelectorAll('.quick-reply').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const message = e.target.dataset.msg;
+            sendMessage(message);
+        });
+    });
+</script>
+{% endblock %}

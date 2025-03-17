@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Hero Section -->
+    <div class="row py-5 bg-gradient-primary text-white rounded-4 mb-5">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h1 class="display-4 mb-4 fw-bold">
+                <i class="bi bi-heart-pulse-fill me-3"></i>Mental Wellness Matters
+            </h1>
+            <p class="lead">Your journey to emotional well-being starts with awareness</p>
+        </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="row g-4">
+        <!-- Why It Matters -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-hover">
+                <div class="card-header bg-soft-primary text-center py-4">
+                    <i class="bi bi-people-fill fs-1 text-primary"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">Why It Matters</h5>
+                    <div class="stats-box text-center mb-4">
+                        <div class="display-6 text-primary">1 in 5</div>
+                        <div class="text-muted">Adults experience mental illness</div>
+                    </div>
+                    <p class="card-text">Early detection and proper care can significantly improve quality of life and recovery outcomes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Our Approach -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-hover">
+                <div class="card-header bg-soft-info text-center py-4">
+                    <i class="bi bi-cpu-fill fs-1 text-info"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">Our Approach</h5>
+                    <div class="process-flow">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-clipboard2-pulse-fill text-info fs-4 me-3"></i>
+                            <span>AI-Powered Assessment</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person-badge-fill text-info fs-4 me-3"></i>
+                            <span>Expert Validation</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-lightbulb-fill text-info fs-4 me-3"></i>
+                            <span>Personalized Insights</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-hover">
+                <div class="card-header bg-soft-success text-center py-4">
+                    <i class="bi bi-life-preserver fs-1 text-success"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">Support Resources</h5>
+                    <ul class="resource-list list-unstyled">
+                        <li class="mb-3">
+                            <i class="bi bi-telephone-outbound-fill text-success me-2"></i>
+                            24/7 Crisis Hotline
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-person-video3-fill text-success me-2"></i>
+                            Licensed Therapists
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-chat-dots-fill text-success me-2"></i>
+                            Support Communities
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Callout -->
+    <div class="row mt-5">
+        <div class="col-md-8 offset-md-2">
+            <div class="support-card bg-soft-warning p-4 rounded-4 shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-hand-thumbs-up-fill fs-1 text-warning"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-4">
+                        <h4 class="mb-3">You're Not Alone</h4>
+                        <p class="mb-0">Mental health is a journey, not a destination. Start your path to understanding with our confidential assessment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #6a1b9a 0%, #9c27b0 100%);
+    }
+    
+    .shadow-hover {
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .shadow-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.15)!important;
+    }
+    
+    .bg-soft-primary { background-color: #f3e5f5; }
+    .bg-soft-info { background-color: #e3f2fd; }
+    .bg-soft-success { background-color: #e8f5e9; }
+    .bg-soft-warning { background-color: #fff3e0; }
+    
+    .resource-list li {
+        padding: 10px;
+        border-radius: 8px;
+        background-color: rgba(255,255,255,0.7);
+        transition: all 0.2s ease;
+    }
+    
+    .resource-list li:hover {
+        background-color: white;
+        transform: translateX(5px);
+    }
+    
+    .support-card {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
