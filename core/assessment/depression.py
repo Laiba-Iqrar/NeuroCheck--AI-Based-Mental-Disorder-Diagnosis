@@ -12,7 +12,7 @@ class DepressionAssessor:
                 "options": [
                     {"text": "Not at all", "score": 0},
                     {"text": "Several days", "score": 1},
-                    {"text": "More than half the days", "score": 2},
+                    {"text": "More than half days", "score": 2},
                     {"text": "Nearly every day", "score": 3}
                 ]
             },
