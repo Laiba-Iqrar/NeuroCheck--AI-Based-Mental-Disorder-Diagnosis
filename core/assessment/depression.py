@@ -28,7 +28,7 @@ class DepressionAssessor:
             # Add remaining questions here
         ]
 
-    # Rest of the class methods remain the same as previous implementation
+
 
     def assess(self, answer: str):
         try:
@@ -44,7 +44,7 @@ class DepressionAssessor:
         if self.current_question < len(self.questions):
             return {
                 "question": self.questions[self.current_question]["text"],
-                "options": [opt["text"] for opt in self.questions[self.current_question]["options"]],
+                "options": [{"text": opt["text"], "score": opt["score"]} for opt in self.questions[self.current_question]["options"]],
                 "status": "continue"
             }
         return {
