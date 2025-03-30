@@ -1,0 +1,4 @@
+static/*.html linguist-vendored
+*.min.html linguist-generated
+
+*.py linguist-language=Python
