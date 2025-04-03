@@ -119,99 +119,6 @@ def about():
 
 
 
-# @app.route('/chat', methods=['POST'])
-# @login_required
-# def chat():
-#     try:
-#         data = request.get_json()
-#         user_message = data['message']
-        
-#         # Crisis detection first
-#         crisis_result = CrisisDetector().detect_crisis(user_message)
-#         if crisis_result['is_crisis']:
-#             return jsonify(crisis_result)
-
-#         # Handle existing assessment
-#         if 'phq9' in session:
-#             assessor = DepressionAssessor(
-#                 score=session['phq9']['score'],
-#                 current_question=session['phq9']['current_question']
-#             )
-#             result = assessor.assess(user_message)
-            
-#             if result.get('status') == 'continue':
-#                 session['phq9'] = {
-#                     'score': assessor.score,
-#                     'current_question': assessor.current_question
-#                 }
-#                 return jsonify({
-#                     "response": result['question'],
-#                     "options": result['options'],
-#                     "status": "assessment_continue"
-#                 })
-                
-#             session.pop('phq9', None)
-#             return jsonify({
-#                 "response": result['diagnosis'],
-#                 "recommendations": get_recommendations(result['diagnosis']),
-#                 "status": "assessment_complete"
-#             })
-
-#         # Check for depression keywords
-#         depression_keywords = ['depress', 'sad', 'hopeless', 'miserable']
-#         if any(key in user_message.lower() for key in depression_keywords):
-#             session['phq9'] = {'score': 0, 'current_question': 0}
-#             first_question = DepressionAssessor.PHQ9_QUESTIONS[0]
-#             return jsonify({
-#                 "response": first_question['text'],
-#                 "options": [opt['text'] for opt in first_question['options']],
-#                 "status": "assessment_start"
-#             })
-
-#         # Normal chat response with timeout
-#         API_URL = "https://api-inference.huggingface.co/models/facebook/blenderbot-1B-distill"
-#         headers = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_API_KEY')}"}
-
-#         try:
-#             response = requests.post(
-#                 API_URL,
-#                 headers=headers,
-#                 json={"inputs": user_message},
-#                 timeout=15
-#             )
-            
-#             if response.status_code == 200:
-#                 result = response.json()
-                
-#                 # Handle different API response formats
-#                 if isinstance(result, list):
-#                     bot_response = result[0]['generated_text']
-#                 elif isinstance(result, dict):
-#                     bot_response = result.get('generated_text', "I'm not sure how to respond to that.")
-#                 else:
-#                     bot_response = "Could you please rephrase that?"
-                    
-#                 return jsonify({'response': bot_response})
-                
-#             return jsonify({
-#                 'response': "I'm having trouble processing that. Could you rephrase?",
-#                 'error': f"API Error: {response.status_code}"
-#             })
-
-#         except requests.Timeout:
-#             return jsonify({
-#                 'response': "I'm taking longer than usual to respond. Please try again.",
-#                 'error': 'API Timeout'
-#             })       
-
-
-#     except Exception as e:
-#         app.logger.error(f"Chat error: {str(e)}")
-#         return jsonify({
-#             'response': "Something went wrong. Please try again.",
-#             'error': str(e)
-#         }), 500  
-
 @app.route('/chat', methods=['POST'])
 @login_required
 def chat():
@@ -220,15 +127,13 @@ def chat():
         data = request.get_json()
         user_message = data['message']
         
-        # Crisis detection first
         crisis_result = CrisisDetector().detect_crisis(user_message)
         if crisis_result['is_crisis']:
+            session.pop('phq9', None)  # Clear any existing assessment
             return jsonify(crisis_result)
 
-        # Handle existing assessment
         if 'phq9' in session:
             try:
-                # Create assessor with session data
                 assessor = DepressionAssessor(
                     score=session['phq9']['score'],
                     current_question=session['phq9']['current_question']
@@ -236,7 +141,11 @@ def chat():
                 result = assessor.assess(user_message)
                 
                 if 'error' in result:
-                    return jsonify(result)
+                    session.pop('phq9', None)  # Clear invalid session
+                    return jsonify({
+                        "error": result['error'],
+                        "status": "error"
+                    })
 
                 if result.get('status') == 'continue':
                     session['phq9'] = {
@@ -245,57 +154,93 @@ def chat():
                     }
                     return jsonify({
                         "response": result['question'],
-                        "options": result['options'],
+                        "options": [{"text": opt["text"], "score": opt["score"]} 
+                                  for opt in assessor.questions[assessor.current_question]["options"]],
                         "status": "assessment_continue"
                     })
                 
                 # Assessment complete
                 session.pop('phq9', None)
                 return jsonify({
-                    "response": result['diagnosis'],
+                    "response": "Assessment complete",
+                    "diagnosis": result['diagnosis'],
                     "recommendations": get_recommendations(result['diagnosis']),
-                    "status": "assessment_complete"
+                    "status": "complete"
                 })
 
             except ValueError:
                 session.pop('phq9', None)
                 return jsonify({
-                    "response": "Assessment cancelled. Please start over if needed.",
+                    "error": "Invalid assessment session. Please start over.",
                     "status": "error"
                 })
 
         # Check for depression keywords
         depression_keywords = ['depress', 'sad', 'hopeless', 'miserable']
         if any(key in user_message.lower() for key in depression_keywords):
-            # Initialize new assessor
             assessor = DepressionAssessor()
             session['phq9'] = {
                 'score': assessor.score,
                 'current_question': assessor.current_question
             }
             return jsonify({
-                "response": assessor.questions[0]["text"],  # Access through instance
-                "options": [opt["text"] for opt in assessor.questions[0]["options"]],
+                "response": assessor.questions[0]["text"],
+                "options": [{"text": opt["text"], "score": opt["score"]} 
+                          for opt in assessor.questions[0]["options"]],
                 "status": "assessment_start"
             })
 
-        # Normal chat response
-        API_URL = "https://api-inference.huggingface.co/models/facebook/blenderbot-1B-distill"
-        headers = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_API_KEY')}"}
 
+        # Replace BlenderBot with Gemma
+        API_URL = "https://api-inference.huggingface.co/models/google/gemma-3.1b-it"
+        headers = {"Authorization": f"Bearer {os.getenv('HUGGINGFACE_API_KEY')}"}
+        
         try:
+            # Updated payload with generation parameters
+            payload = {
+                "inputs": user_message,
+                "parameters": {
+                    "max_new_tokens": 512,
+                    "temperature": 0.7,
+                    "top_p": 0.9,
+                    "repetition_penalty": 1.1
+                }
+            }
+            
             response = requests.post(
                 API_URL,
                 headers=headers,
-                json={"inputs": user_message},
-                timeout=15
+                json=payload,
+                timeout=60
             )
+           
+
             
             if response.status_code == 200:
-                result = response.json()
-                bot_response = result[0]['generated_text'] if isinstance(result, list) else \
-                            result.get('generated_text', "Could you please rephrase that?")
+                # Handle Gemma's response format
+                response_data = response.json()
+                
+                # Gemma typically returns a list of generated texts
+                if isinstance(response_data, list):
+                    bot_response = response_data[0].get('generated_text', "Could you  rephrase that?")
+                else:
+                    bot_response = response_data.get('generated_text', "Could you  rephrase that?")
+                
+                # Clean up any special tokens
+                bot_response = bot_response.replace("<start_of_turn>", "").replace("<end_of_turn>", "")
+                
+                # Add basic conversation handling
+                if user_message.lower() in ['hi', 'hello', 'hey']:
+                    bot_response = "Hello! How can I support you today?"
+                    
                 return jsonify({'response': bot_response})
+            
+            # Handle model loading time
+            if response.status_code == 503:
+                return jsonify({
+                    'response': "I'm still getting ready. Please give me a moment!",
+                    'status': 'retry'
+                })
             
             return jsonify({
                 'response': "I'm having trouble processing that. Could you rephrase?",
@@ -307,6 +252,7 @@ def chat():
                 'response': "I'm taking longer than usual to respond. Please try again.",
                 'error': 'API Timeout'
             })
+
 
     except Exception as e:
         app.logger.error(f"Chat error: {str(e)}")
